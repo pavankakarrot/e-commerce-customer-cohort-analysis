@@ -33,26 +33,47 @@ Perform a cohort analysis to quantify retention and revenue progression by month
 
 ## 2. Data Collection & Preparation
 
+### Source Dataset  
+- **File:** `Online Retail.xlsx`  
+- **Source:** UCI Machine Learning Repository  
+- **Coverage:** December 2010 – December 2011, ~540,000 transaction records
 
-### Feature Engineering:
-# Calculate total transaction amount
-df['TotalAmount'] = df.Quantity * df.UnitPrice
+### Initial Data Cleaning (Python / pandas)  
+```python
+import pandas as pd
 
-# Convert to datetime and extract month period
-df['InvoiceDate'] = pd.to_datetime(df.InvoiceDate)
-df['CohortMonth'] = df['InvoiceDate'].dt.to_period('M')
+# Load the Excel file
+df = pd.read_excel('data/Online Retail.xlsx')
 
-# Determine each customer’s first purchase month
-df['FirstPurchaseDate'] = (
-    df.groupby('CustomerID')
-      .InvoiceDate.transform('min')
-)
-df['FirstCohortMonth'] = df['FirstPurchaseDate'].dt.to_period('M')
+# 1. Remove exact duplicate rows
+df.drop_duplicates(inplace=True)
 
-# Compute months since first purchase
+# 2. Filter out invalid transactions
+df = df[
+    (df.Quantity > 0) & 
+    (df.UnitPrice > 0) & 
+    df.CustomerID.notnull()
+]
+
+# 3. Reset index after filtering
+df.reset_index(drop=True, inplace=True)
+```
+### Feature engineering
+##### 1. Compute total transaction amount
+df['TotalAmount'] = df['Quantity'] * df['UnitPrice']
+
+##### 2. Convert InvoiceDate to datetime and extract cohort period
+df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+df['CohortMonth']  = df['InvoiceDate'].dt.to_period('M')
+
+##### 3. Identify each customer’s first purchase date & cohort
+df['FirstPurchaseDate'] = df.groupby('CustomerID')['InvoiceDate'].transform('min')
+df['FirstCohortMonth']  = df['FirstPurchaseDate'].dt.to_period('M')
+
+##### 4. Calculate months since first purchase for each transaction
 df['MonthsFromFirstPurchase'] = (
-    (df.InvoiceDate.dt.year - df.FirstPurchaseDate.dt.year) * 12
-  + (df.InvoiceDate.dt.month - df.FirstPurchaseDate.dt.month)
+    (df['InvoiceDate'].dt.year  - df['FirstPurchaseDate'].dt.year)  * 12 +
+    (df['InvoiceDate'].dt.month - df['FirstPurchaseDate'].dt.month)
 )
 
 
