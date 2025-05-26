@@ -12,8 +12,6 @@ An end-to-end cohort analysis case study for a UK-based online gift retailer. We
 4. [Tableau Visualization Process](#tableau-visualization-process)  
 5. [Business Insights & Recommendations](#business-insights--recommendations)  
 6. [Challenges & Learnings](#challenges--learnings)  
-7. [Repository Structure](#repository-structure)  
-8. [How to Reproduce](#how-to-reproduce)  
 
 ---
 
